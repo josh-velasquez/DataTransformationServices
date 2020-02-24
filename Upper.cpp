@@ -18,6 +18,20 @@ struct Socket
     sockaddr_in address;
 };
 
+/**
+ * Prints errors and exits program
+*/
+void errorEncountered(string type, string status, bool quit)
+{
+    cout << "Error encountered: " << type << endl;
+    cout << "Status: " << status << endl;
+    if (quit)
+    {
+        cout << "Exiting program..." << endl;
+        exit(1);
+    }
+}
+
 static void createUDPSocket(string targetIpAddress, int port, Socket &targetSocket)
 {
     int socketVal;
@@ -36,20 +50,6 @@ static void createUDPSocket(string targetIpAddress, int port, Socket &targetSock
     }
     targetSocket.socketVal = socketVal;
     targetSocket.address = address;
-}
-
-/**
- * Prints errors and exits program
-*/
-void errorEncountered(string type, string status, bool quit)
-{
-    cout << "Error encountered: " << type << endl;
-    cout << "Status: " << status << endl;
-    if (quit)
-    {
-        cout << "Exiting program..." << endl;
-        exit(1);
-    }
 }
 
 static void processUserRequests(string userInput)
@@ -78,8 +78,7 @@ static void startUpperService(int serverPort, string serverIp, string targetIpAd
     char inBuffer[BUFFERSIZE];
     while (true)
     {
-        bzero(inBuffer,BUFFERSIZE);
-        
+        bzero(inBuffer, BUFFERSIZE);
     }
 }
 
@@ -90,4 +89,10 @@ string toUpper(string text)
     for (int i = 0; i < text.length(); ++i)
         newString += toupper(text[i], loc);
     return newString;
+}
+
+int main(int argc, char *argv[])
+{
+    cout << toUpper("testing") << endl;
+    return 0;
 }

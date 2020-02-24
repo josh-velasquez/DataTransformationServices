@@ -34,7 +34,7 @@ void errorEncountered(string type, string status, bool quit)
 /**
  * Creates a socket for the parameters
 */
-static void createSocket(string targetIpAddress, int port, Socket &targetSocket)
+static void createSocket(string targetIpAddress, int port, Socket &targetSocket, int socketType)
 {
     int socketVal;
     struct sockaddr_in address;
@@ -45,7 +45,7 @@ static void createSocket(string targetIpAddress, int port, Socket &targetSocket)
     address.sin_port = htons(port);
 
     // Create socket for server
-    if ((socketVal = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    if ((socketVal = socket(AF_INET, SOCK_STREAM, socketType)) < 0)
     {
         errorEncountered("socket()", "Failed", true);
     }
@@ -54,41 +54,113 @@ static void createSocket(string targetIpAddress, int port, Socket &targetSocket)
 }
 
 /**
- * Starts the microservices servers
+ * Starts the microservices servers by invoking a shell script
 */
 static void startMicroServices()
 {
+    system("./StartMicroServices.sh");
 }
 
-static void runMicroService()
+string runIdentityMicroService()
 {
 }
 
-static void modifyMessage()
+string runReverseMicroService()
 {
 }
 
-static void printUserOptions()
+string runUpperMicroService()
 {
-    printf("\n####################################");
-    printf("Data Transformation Services");
-    printf("What would you like to do?");
-    printf("\t1. Enter a message");
-    printf("\t2. Run microservice(s)");
-    printf("\t3. Exit program");
-    int userChoice;
-    printf(">> ");
-    cin >> userChoice;
-    switch (userChoice)
+}
+
+string runLowerMicroService()
+{
+}
+
+string runCaesarMicroService()
+{
+}
+
+string runCustomMicroService()
+{
+}
+
+char *printUserOptions()
+{
+    return "\n####################################\nData Transformation Services\nWhat would you like to do?\n\t1. Enter a message\n\t2. Run microservice(s)\n\t3. Exit program";
+}
+
+char *processMicroServiceRequests(char *userChoice, char *userMessage)
+{
+    string choice, message, newUserMessage, num;
+    choice += userChoice;
+    message += userMessage;
+    for (int i = 0; i < strlen(userChoice); i++)
     {
-    case 1:
-        modifyMessage();
-        break;
-    case 2:
-        runMicroService();
-        break;
-    default:
-        exit(1);
+        num = userChoice[i];
+        if (num == "1")
+        {
+            newUserMessage = runIdentityMicroService();
+        }
+        else if (num == "2")
+        {
+            newUserMessage = runReverseMicroService();
+        }
+        else if (num == "3")
+        {
+            newUserMessage = runUpperMicroService();
+        }
+        else if (num == "4")
+        {
+            newUserMessage = runLowerMicroService();
+        }
+        else if (num == "5")
+        {
+            newUserMessage = runCaesarMicroService();
+        }
+        else if (num == "6")
+        {
+            newUserMessage = runCustomMicroService();
+        }
+    }
+    char charMessage[newUserMessage.size() + 1];
+    strcpy(charMessage, newUserMessage.c_str());
+    return charMessage;
+}
+
+void processClientRequest(int socket)
+{
+    char inBuffer[BUFFERSIZE], savedMessage[BUFFERSIZE];
+    int bytesRecv, bytesSent;
+    char *str;
+
+    while (strncmp(inBuffer, "3", 1) != 0)
+    {
+        memset(&inBuffer, 0, BUFFERSIZE);
+        str = printUserOptions();
+        bytesSent = send(socket, str, sizeof(str), 0);
+        if (bytesSent < 0)
+        {
+            errorEncountered("send()", "Failed", true);
+        }
+        bytesRecv = recv(socket, (char *)inBuffer, BUFFERSIZE, 0);
+        if (bytesRecv < 0)
+        {
+            errorEncountered("recv()", "Failed", true);
+        }
+        if (strncmp(inBuffer, "1", 1) != 0)
+        {
+            bcopy(inBuffer, savedMessage, bytesRecv);
+        }
+        else
+        {
+            str = processMicroServiceRequests(inBuffer, savedMessage);
+            bytesSent = send(socket, str, sizeof(str), 0);
+            if (bytesSent < 0)
+            {
+                errorEncountered("send()", "Failed", true);
+            }
+        }
     }
 }
 
@@ -98,7 +170,8 @@ void startDataTransformationServer(string targetIpAddress, int port)
     printf("\n########################################################################\n");
     printf("Creating proxy socket...");
     Socket proxy = Socket();
-    createSocket(targetIpAddress, port, proxy);
+    // Create a TCP connection with client
+    createSocket(targetIpAddress, port, proxy, IPPROTO_TCP);
     printf("Binding sockets..");
     if (bind(proxy.socketVal, (struct sockaddr *)&proxy.address, sizeof(struct sockaddr_in)) < 0)
     {
@@ -122,7 +195,7 @@ void startDataTransformationServer(string targetIpAddress, int port)
         }
         cout << "Request received: " << inet_ntoa(clientAddress.sin_addr) << endl;
         printf("Processing request...");
-        // processClientRequest(dataSocket);
+        processClientRequest(dataSocket);
         printf("Forwarded client request successfully.");
         close(dataSocket);
     }
@@ -130,7 +203,6 @@ void startDataTransformationServer(string targetIpAddress, int port)
 
 int main(int argc, char *argv[])
 {
-
     switch (argc)
     {
     case 2:
@@ -141,7 +213,7 @@ int main(int argc, char *argv[])
         startDataTransformationServer(argv[1], atoi(argv[2]));
         break;
     default:
-        cout << "Usage: " << argv[0] << " <Proxy IP> <Target Port> | "
+        cout << "Usage: " << argv[0] << " <Target IP> <Target Port> | "
              << "<Target Port>" << endl;
         exit(1);
     }
