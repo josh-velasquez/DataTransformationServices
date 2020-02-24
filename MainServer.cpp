@@ -5,9 +5,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <iostream>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <netinet/in.h>
 
 using namespace std;
 
