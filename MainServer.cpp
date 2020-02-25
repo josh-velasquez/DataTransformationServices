@@ -41,7 +41,8 @@ static void createSocket(string targetIpAddress, int port, Socket &targetSocket,
 
     // Set addresses to target ip and port
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(targetIpAddress.c_str());
+    // address.sin_addr.s_addr = inet_addr(targetIpAddress.c_str());
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
     address.sin_port = htons(port);
 
     // Create socket for server
@@ -63,31 +64,32 @@ static void startMicroServices()
 
 string runIdentityMicroService()
 {
+    return "";
 }
 
 string runReverseMicroService()
 {
+    return "";
 }
 
 string runUpperMicroService()
 {
+    return "";
 }
 
 string runLowerMicroService()
 {
+    return "";
 }
 
 string runCaesarMicroService()
 {
+    return "";
 }
 
 string runCustomMicroService()
 {
-}
-
-char *printUserOptions()
-{
-    return "\n####################################\nData Transformation Services\nWhat would you like to do?\n\t1. Enter a message\n\t2. Run microservice(s)\n\t3. Exit program";
+    return "";
 }
 
 char *processMicroServiceRequests(char *userChoice, char *userMessage)
@@ -128,51 +130,85 @@ char *processMicroServiceRequests(char *userChoice, char *userMessage)
     return charMessage;
 }
 
-void processClientRequest(int socket)
+void sendMicroServiceResponseToClient(int clientSocket, string message)
 {
-    char inBuffer[BUFFERSIZE], savedMessage[BUFFERSIZE];
-    int bytesRecv, bytesSent;
-    char *str;
-
-    while (strncmp(inBuffer, "3", 1) != 0)
+    int bytesSent;
+    char outBuffer[BUFFERSIZE];
+    strcpy(outBuffer, message.c_str());
+    cout << "Forwarding microservice response to client..." << endl;
+    bytesSent = send(clientSocket, outBuffer, BUFFERSIZE, 0);
+    if (bytesSent < 0)
     {
-        memset(&inBuffer, 0, BUFFERSIZE);
-        str = printUserOptions();
-        bytesSent = send(socket, str, sizeof(str), 0);
-        if (bytesSent < 0)
+        cout << "send() failed" << endl;
+    }
+}
+
+void processClientRequest(int clientSocket, string userInput)
+{
+    // Split user input by \n
+
+    // First line is message
+    // Second is microserver
+    string microservices;
+    char microservice;
+    string newUserMessage;
+    for (int i = 0; i < microservices.length; i++)
+    {
+        microservice = microservices[i];
+        if (microservice == '1')
         {
-            errorEncountered("send()", "Failed", true);
+            newUserMessage = runIdentityMicroService();
         }
-        bytesRecv = recv(socket, (char *)inBuffer, BUFFERSIZE, 0);
-        if (bytesRecv < 0)
+        else if (microservice == '2')
         {
-            errorEncountered("recv()", "Failed", true);
+            newUserMessage = runReverseMicroService();
         }
-        if (strncmp(inBuffer, "1", 1) != 0)
+        else if (microservice == '3')
         {
-            bcopy(inBuffer, savedMessage, bytesRecv);
+            newUserMessage = runUpperMicroService();
         }
-        else
+        else if (microservice == '4')
         {
-            str = processMicroServiceRequests(inBuffer, savedMessage);
-            bytesSent = send(socket, str, sizeof(str), 0);
-            if (bytesSent < 0)
-            {
-                errorEncountered("send()", "Failed", true);
-            }
+            newUserMessage = runLowerMicroService();
+        }
+        else if (microservice == '5')
+        {
+            newUserMessage = runCaesarMicroService();
+        }
+        else if (microservice == '6')
+        {
+            newUserMessage = runCustomMicroService();
         }
     }
+
+    sendMicroServiceResponseToClient(clientSocket, newUserMessage);
+}
+
+void processClient(int clientSocket)
+{
+    char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE], savedMessage[BUFFERSIZE];
+    int bytesRecv, bytesSent;
+    cout << "Waiting for client request..." << endl;
+    bytesRecv = recv(clientSocket, (char *)&inBuffer, BUFFERSIZE, 0);
+    if (bytesRecv < 0)
+    {
+        cout << "recv() failed" << endl;
+    }
+    cout << "Client request received." << endl;
+    cout << inBuffer << endl;
+    processClientRequest(clientSocket, inBuffer);
 }
 
 void startDataTransformationServer(string targetIpAddress, int port)
 {
     int dataSocket;
-    printf("\n########################################################################\n");
-    printf("Creating proxy socket...");
+    cout << "\n########################################################################\n"
+         << endl;
+    cout << "Creating server socket..." << endl;
     Socket proxy = Socket();
     // Create a TCP connection with client
     createSocket(targetIpAddress, port, proxy, IPPROTO_TCP);
-    printf("Binding sockets..");
+    cout << "Binding sockets.." << endl;
     if (bind(proxy.socketVal, (struct sockaddr *)&proxy.address, sizeof(struct sockaddr_in)) < 0)
     {
         errorEncountered("bind()", "Failed", true);
@@ -181,22 +217,22 @@ void startDataTransformationServer(string targetIpAddress, int port)
     {
         errorEncountered("listen()", "Failed", true);
     }
-    printf("Proxy server listening for requests...");
+    cout << "Server listening for client connections..." << endl;
     while (true)
     {
         struct sockaddr_in clientAddress;
         int client = sizeof(struct sockaddr);
-        printf("\n########################################################################\n");
-        printf("Waiting for requests...");
+        cout << "\n########################################################################\n"
+             << endl;
         dataSocket = accept(proxy.socketVal, (struct sockaddr *)&clientAddress, (socklen_t *)&client);
         if (dataSocket < 0)
         {
             errorEncountered("accept()", "Failed", true);
         }
-        cout << "Request received: " << inet_ntoa(clientAddress.sin_addr) << endl;
-        printf("Processing request...");
-        processClientRequest(dataSocket);
-        printf("Forwarded client request successfully.");
+        cout << "Client connected: " << inet_ntoa(clientAddress.sin_addr) << endl;
+        cout << "Processing client..." << endl;
+        processClient(dataSocket);
+        // cout << "Forwarded client request successfully." << endl;
         close(dataSocket);
     }
 }
