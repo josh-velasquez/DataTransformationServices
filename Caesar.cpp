@@ -19,7 +19,7 @@ const int BUFFERSIZE = 2048;
 
 string toCaesar(string text)
 {
-    int shift = 5;
+    int shift = 13;
     string alphabet = "abcdefghijklmnopqrstuvwxyz";
     string newMessage = "";
     for (int i = 0; i < text.length(); i++)

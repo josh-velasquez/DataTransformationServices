@@ -144,39 +144,38 @@ void processClientRequest(string targetIp, int port, int clientSocket, string us
 {
     // The user input will consist of "message\nmicroservices" so we need to split by \n
     int pos = userInput.find("\n");
-    string userMessage = userInput.substr(0, pos);
+    string newUserMessage = userInput.substr(0, pos);
     string microservices = userInput.substr(pos + 1, userInput.length());
     char microservice;
-    string newUserMessage;
     cout << "Starting microservices..." << endl;
-    startMicroServices(targetIp, port);
+    // startMicroServices(targetIp, port);
     cout << "Microservices on standby." << endl;
     for (int i = 0; i < microservices.length(); i++)
     {
         microservice = microservices[i];
         if (microservice == '1')
         {
-            newUserMessage = runIdentityMicroService(targetIp, port + 1, userMessage);
+            newUserMessage = runIdentityMicroService(targetIp, port + 1, newUserMessage);
         }
         else if (microservice == '2')
         {
-            newUserMessage = runReverseMicroService(targetIp, port + 2, userMessage);
+            newUserMessage = runReverseMicroService(targetIp, port + 2, newUserMessage);
         }
         else if (microservice == '3')
         {
-            newUserMessage = runUpperMicroService(targetIp, port + 3, userMessage);
+            newUserMessage = runUpperMicroService(targetIp, port + 3, newUserMessage);
         }
         else if (microservice == '4')
         {
-            newUserMessage = runLowerMicroService(targetIp, port + 4, userMessage);
+            newUserMessage = runLowerMicroService(targetIp, port + 4, newUserMessage);
         }
         else if (microservice == '5')
         {
-            newUserMessage = runCaesarMicroService(targetIp, port + 5, userMessage);
+            newUserMessage = runCaesarMicroService(targetIp, port + 5, newUserMessage);
         }
         else if (microservice == '6')
         {
-            newUserMessage = runCustomMicroService(targetIp, port + 6, userMessage);
+            newUserMessage = runCustomMicroService(targetIp, port + 6, newUserMessage);
         }
     }
     sendMicroServiceResponseToClient(clientSocket, newUserMessage);

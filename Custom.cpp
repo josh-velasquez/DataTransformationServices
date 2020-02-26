@@ -18,7 +18,22 @@ const int BUFFERSIZE = 2048;
 
 string toPigLatin(string text)
 {
-    return "testing pig";
+    string newText = "";
+    string vowels = "aeiou";
+    char firstLetter = text[0];
+    cout << firstLetter << endl;
+    if (vowels.find(firstLetter) == string::npos)
+    {
+        newText = text.substr(1, text.length() - 1);
+        cout << newText << endl;
+        newText += firstLetter;
+    }
+    else
+    {
+        newText = text;
+    }
+    newText += "ay";
+    return newText;
 }
 
 void startCustomMicroService(string serverIp, int port)
