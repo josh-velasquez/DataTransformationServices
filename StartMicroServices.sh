@@ -16,30 +16,46 @@ echo "Finished compiling micro services.\n"
 
 # zsh -c is for running on zsh terminal
 # gnome-terminal -e is for linux
+# $1 will have the server ip address
+# $2 will have the port number
+
+# let portNumber = $2
 
 echo "Starting microservices..."
 echo "Starting Identity microservice..."
-# gnome-terminal -e ./identity
-zsh -c './indentity'
+# gnome-terminal -e ./identity $1 ($2 + 1)
+# portNumber = $portNumber + 1
+# zsh -c './indentity' $1 portNumber
+# zsh -c './indentity' "10.13.118.4" 7001
 
-echo "Starting Reverse microservice..."
-# gnome-terminal -e ./reverse
-zsh -c './reverse'
+# echo "Starting Reverse microservice..."
+# gnome-terminal -e ./reverse $1 ($2 + 2)
+# portNumber = $portNumber + 1
+# zsh -c './reverse' $1 $portNumber
+# zsh -c './reverse' "10.13.118.4" 8002
 
-echo "Starting Upper microservice..."
-# gnome-terminal -e ./upper
-zsh -c './upper'
+# echo "Starting Upper microservice..."
+# gnome-terminal -e ./upper $1 ($2 + 3)
+# portNumber = $portNumber + 1
+# zsh -c './upper' $1 portNumber
+# zsh -c './upper' "10.13.118.4" 8003
 
-echo "Starting Lower microservice..."
-# gnome-terminal -e ./lower
-zsh -c './lower'
+# echo "Starting Lower microservice..."
+# gnome-terminal -e ./lower $1 ($2 + 4)
+# portNumber = $portNumber + 1
+# zsh -c './lower' $1 portNumber
+# zsh -c './lower' "10.13.118.4" 8004
 
-echo "Starting Caesar microservice..."
-# gnome-terminal -e ./caesar
-zsh -c './caesar'
+# echo "Starting Caesar microservice..."
+# gnome-terminal -e ./caesar $1 ($2 + 5)
+# portNumber = $portNumber + 1
+# zsh -c './caesar' $1 portNumber
+# zsh -c './caesar' "10.13.118.4" 8005
 
-echo "Starting Custom microservice..."
-# gnome-terminal -e ./custom
-zsh -c './custom'
+# echo "Starting Custom microservice..."
+# gnome-terminal -e ./custom $1 ($2 + 6)
+# portNumber = $portNumber + 1
+# zsh -c './custom' $1 portNumber
+# zsh -c './custom' "10.13.118.4" 8006
 
-echo "Successfully started microservices."
+# echo "Successfully started microservices."

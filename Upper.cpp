@@ -12,76 +12,6 @@ using namespace std;
 
 const int BUFFERSIZE = 2048;
 
-struct Socket
-{
-    int socketVal;
-    sockaddr_in address;
-};
-
-/**
- * Prints errors and exits program
-*/
-void errorEncountered(string type, string status, bool quit)
-{
-    cout << "Error encountered: " << type << endl;
-    cout << "Status: " << status << endl;
-    if (quit)
-    {
-        cout << "Exiting program..." << endl;
-        exit(1);
-    }
-}
-
-static void createUDPSocket(string targetIpAddress, int port, Socket &targetSocket)
-{
-    int socketVal;
-    struct sockaddr_in address;
-    struct sockaddr *server;
-
-    // Set addresses to target ip and port
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(targetIpAddress.c_str());
-    address.sin_port = htons(port);
-
-    // Create socket for server
-    if ((socketVal = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-    {
-        errorEncountered("socket()", "Failed", true);
-    }
-    targetSocket.socketVal = socketVal;
-    targetSocket.address = address;
-}
-
-static void processUserRequests(string userInput)
-{
-    char inBuffer[BUFFERSIZE];
-}
-
-static void startUpperService(int serverPort, string serverIp, string targetIpAddress, int port)
-{
-    struct sockaddr_in microService;
-    struct sockaddr *server;
-    int socketVal;
-
-    if ((socketVal = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-    {
-        errorEncountered("socket()", "Failed", true);
-    }
-
-    microService.sin_family = AF_INET;
-    microService.sin_port = htons(serverPort);
-
-    if (inet_pton(AF_INET, serverIp.c_str(), &microService.sin_addr) == 0)
-    {
-        errorEncountered("inet_pton()", "Failed", true);
-    }
-    char inBuffer[BUFFERSIZE];
-    while (true)
-    {
-        bzero(inBuffer, BUFFERSIZE);
-    }
-}
-
 string toUpper(string text)
 {
     string newString = "";
@@ -91,8 +21,57 @@ string toUpper(string text)
     return newString;
 }
 
+void startUpperMicroService(string serverIp, int port)
+{
+    cout << "#########################################" << endl;
+    cout << "\nUpper Micro Service" << endl;
+    cout << "#########################################" << endl;
+    int serverSocket, bytesSent, bytesRecv;
+    char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
+    struct sockaddr_in serverAddress;
+    if ((serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+    {
+        cout << "socket() failed" << endl;
+        exit(1);
+    }
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(port);
+    serverAddress.sin_addr.s_addr = inet_addr(serverIp.c_str());
+
+    cout << "Connecting to server..." << endl;
+    if (connect(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+    {
+        cout << "connect() failed" << endl;
+        exit(1);
+    }
+    cout << "Connected to server." << endl;
+    cout << "Receiving request from server..." << endl;
+    bytesRecv = recv(serverSocket, inBuffer, BUFFERSIZE, 0);
+    if (bytesRecv < 0)
+    {
+        cout << "recv() failed" << endl;
+        exit(1);
+    }
+    cout << "Server request received." << endl;
+    string response = toUpper(inBuffer);
+    strcpy(outBuffer, response.c_str());
+    cout << "Sending response to server..." << endl;
+    bytesSent = send(serverSocket, outBuffer, BUFFERSIZE, 0);
+    if (bytesSent < 0)
+    {
+        cout << "send() failed" << endl;
+        exit(1);
+    }
+    cout << "Response sent to server." << endl;
+}
+
 int main(int argc, char *argv[])
 {
-    cout << toUpper("testing") << endl;
+    if (argc != 2)
+    {
+        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        exit(1);
+    }
+    startUpperMicroService(argv[1], atoi(argv[2]));
     return 0;
 }

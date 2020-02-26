@@ -34,7 +34,7 @@ void errorEncountered(string type, string status, bool quit)
 /**
  * Creates a socket for the parameters
 */
-static void createSocket(string targetIpAddress, int port, Socket &targetSocket, int socketType)
+static void createSocket(string targetIpAddress, int port, Socket &targetSocket, int sock, int socketType)
 {
     int socketVal;
     struct sockaddr_in address;
@@ -46,7 +46,7 @@ static void createSocket(string targetIpAddress, int port, Socket &targetSocket,
     address.sin_port = htons(port);
 
     // Create socket for server
-    if ((socketVal = socket(AF_INET, SOCK_STREAM, socketType)) < 0)
+    if ((socketVal = socket(AF_INET, sock, socketType)) < 0)
     {
         errorEncountered("socket()", "Failed", true);
     }
@@ -57,77 +57,75 @@ static void createSocket(string targetIpAddress, int port, Socket &targetSocket,
 /**
  * Starts the microservices servers by invoking a shell script
 */
-static void startMicroServices()
+static void startMicroServices(string targetIp, int port)
 {
-    system("./StartMicroServices.sh");
+    string command = "./StartMicroServices.sh " + targetIp + " " + to_string(port);
+    system(command.c_str());
 }
 
-string runIdentityMicroService()
+string connectToMicroService(string microservice, string targetIp, int port, string message)
 {
-    return "";
-}
-
-string runReverseMicroService()
-{
-    return "";
-}
-
-string runUpperMicroService()
-{
-    return "";
-}
-
-string runLowerMicroService()
-{
-    return "";
-}
-
-string runCaesarMicroService()
-{
-    return "";
-}
-
-string runCustomMicroService()
-{
-    return "";
-}
-
-char *processMicroServiceRequests(char *userChoice, char *userMessage)
-{
-    string choice, message, newUserMessage, num;
-    choice += userChoice;
-    message += userMessage;
-    for (int i = 0; i < strlen(userChoice); i++)
+    int serverSocket, bytesSent, bytesRecv;
+    char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
+    // Socket microserviceSocket = Socket();
+    // createSocket(targetIp, port, microserviceSocket, SOCK_DGRAM, IPPROTO_UDP);
+    struct sockaddr_in server;
+    if ((serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        num = userChoice[i];
-        if (num == "1")
-        {
-            newUserMessage = runIdentityMicroService();
-        }
-        else if (num == "2")
-        {
-            newUserMessage = runReverseMicroService();
-        }
-        else if (num == "3")
-        {
-            newUserMessage = runUpperMicroService();
-        }
-        else if (num == "4")
-        {
-            newUserMessage = runLowerMicroService();
-        }
-        else if (num == "5")
-        {
-            newUserMessage = runCaesarMicroService();
-        }
-        else if (num == "6")
-        {
-            newUserMessage = runCustomMicroService();
-        }
+        cout << "socket() failed" << endl;
     }
-    char charMessage[newUserMessage.size() + 1];
-    strcpy(charMessage, newUserMessage.c_str());
-    return charMessage;
+    memset((char *)&server, 0, sizeof(server));
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
+    server.sin_addr.s_addr = inet_addr(targetIp.c_str());
+    cout << "Sending request to " << microservice << " microservice..." << endl;
+    strcpy(outBuffer, message.c_str());
+    bytesSent = sendto(serverSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&server, sizeof(server));
+    if (bytesSent < 0)
+    {
+        cout << "sendto() failed" << endl;
+        exit(1);
+    }
+    cout << "Request sent to " << microservice << " microservice." << endl;
+    cout << "Waiting for " << microservice << " microservice response..." << endl;
+    bytesRecv = recvfrom(serverSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&server, (socklen_t *)&server);
+    if (bytesRecv < 0)
+    {
+        cout << "recv() failed" << endl;
+        exit(1);
+    }
+    cout << "Response from " << microservice << " microservice received." << endl;
+    return inBuffer;
+}
+
+string runIdentityMicroService(string targetIp, int port, string message)
+{
+    return connectToMicroService("identity", targetIp, port, message);
+}
+
+string runReverseMicroService(string targetIp, int port, string message)
+{
+    return connectToMicroService("reverse", targetIp, port, message);
+}
+
+string runUpperMicroService(string targetIp, int port, string message)
+{
+    return connectToMicroService("upper", targetIp, port, message);
+}
+
+string runLowerMicroService(string targetIp, int port, string message)
+{
+    return connectToMicroService("lower", targetIp, port, message);
+}
+
+string runCaesarMicroService(string targetIp, int port, string message)
+{
+    return connectToMicroService("caesar", targetIp, port, message);
+}
+
+string runCustomMicroService(string targetIp, int port, string message)
+{
+    return connectToMicroService("custom", targetIp, port, message);
 }
 
 void sendMicroServiceResponseToClient(int clientSocket, string message)
@@ -143,48 +141,56 @@ void sendMicroServiceResponseToClient(int clientSocket, string message)
     }
 }
 
-void processClientRequest(int clientSocket, string userInput)
+/**
+ * NOTE: The ports are incremented respestively so they can run on their own ports 
+ * (this value should correspond to the port values assigned in the bash script that 
+ * auto launches the microservices)
+ * Ex. if the server is running on port 3000, the identity microservice would run at
+ * port at port 30001
+*/
+void processClientRequest(string targetIp, int port, int clientSocket, string userInput)
 {
-    // Split user input by \n
-
-    // First line is message
-    // Second is microserver
-    string microservices;
+    // The user input will consist of "message\nmicroservices" so we need to split by \n
+    int pos = userInput.find("\n");
+    string userMessage = userInput.substr(0, pos);
+    string microservices = userInput.substr(pos + 1, userInput.length());
     char microservice;
     string newUserMessage;
-    for (int i = 0; i < microservices.length; i++)
+    cout << "Starting microservices..." << endl;
+    // startMicroServices(targetIp, port);
+    cout << "Microservices on standby." << endl;
+    for (int i = 0; i < microservices.length(); i++)
     {
         microservice = microservices[i];
         if (microservice == '1')
         {
-            newUserMessage = runIdentityMicroService();
+            newUserMessage = runIdentityMicroService(targetIp, port + 1, userMessage);
         }
         else if (microservice == '2')
         {
-            newUserMessage = runReverseMicroService();
+            newUserMessage = runReverseMicroService(targetIp, port + 2, userMessage);
         }
         else if (microservice == '3')
         {
-            newUserMessage = runUpperMicroService();
+            newUserMessage = runUpperMicroService(targetIp, port + 3, userMessage);
         }
         else if (microservice == '4')
         {
-            newUserMessage = runLowerMicroService();
+            newUserMessage = runLowerMicroService(targetIp, port + 4, userMessage);
         }
         else if (microservice == '5')
         {
-            newUserMessage = runCaesarMicroService();
+            newUserMessage = runCaesarMicroService(targetIp, port + 5, userMessage);
         }
         else if (microservice == '6')
         {
-            newUserMessage = runCustomMicroService();
+            newUserMessage = runCustomMicroService(targetIp, port + 6, userMessage);
         }
     }
-
     sendMicroServiceResponseToClient(clientSocket, newUserMessage);
 }
 
-void processClient(int clientSocket)
+void processClient(string targetIp, int port, int clientSocket)
 {
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE], savedMessage[BUFFERSIZE];
     int bytesRecv, bytesSent;
@@ -195,8 +201,8 @@ void processClient(int clientSocket)
         cout << "recv() failed" << endl;
     }
     cout << "Client request received." << endl;
-    cout << inBuffer << endl;
-    processClientRequest(clientSocket, inBuffer);
+    // cout << inBuffer << endl;
+    processClientRequest(targetIp, port, clientSocket, inBuffer);
 }
 
 void startDataTransformationServer(string targetIpAddress, int port)
@@ -207,7 +213,7 @@ void startDataTransformationServer(string targetIpAddress, int port)
     cout << "Creating server socket..." << endl;
     Socket proxy = Socket();
     // Create a TCP connection with client
-    createSocket(targetIpAddress, port, proxy, IPPROTO_TCP);
+    createSocket(targetIpAddress, port, proxy, SOCK_STREAM, IPPROTO_TCP);
     cout << "Binding sockets.." << endl;
     if (bind(proxy.socketVal, (struct sockaddr *)&proxy.address, sizeof(struct sockaddr_in)) < 0)
     {
@@ -231,7 +237,7 @@ void startDataTransformationServer(string targetIpAddress, int port)
         }
         cout << "Client connected: " << inet_ntoa(clientAddress.sin_addr) << endl;
         cout << "Processing client..." << endl;
-        processClient(dataSocket);
+        processClient(targetIpAddress, port, dataSocket);
         // cout << "Forwarded client request successfully." << endl;
         close(dataSocket);
     }

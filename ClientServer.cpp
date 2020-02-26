@@ -7,22 +7,20 @@ using namespace std;
 
 const int BUFFERSIZE = 2048;
 
-int printUserOptions()
+string printUserOptions()
 {
-    int userChoice;
-    cout << "\n##############################################"
-         << "\n#        Data Transformation Services        #"
-         << "\n##############################################\n\n"
-         << "\nWhat would you like to do?\n"
-         << "\t1. Enter a message\n"
-         << "\t2. Run microservice(s)\n"
-         << "\t3. Exit program\n"
-         << ">> ";
-    cin >> userChoice;
+    string userChoice;
+    cout
+        << "\nWhat would you like to do?\n"
+        << "\t1. Enter a message\n"
+        << "\t2. Run microservice(s)\n"
+        << "\t3. Exit program\n"
+        << ">> ";
+    getline(cin, userChoice, '\n');
     return userChoice;
 }
 
-void sendRequestToServer(string serverIp, int port, char message, char microservice)
+void sendRequestToServer(string serverIp, int port, string message, string microservice)
 {
     int serverSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress;
@@ -45,8 +43,8 @@ void sendRequestToServer(string serverIp, int port, char message, char microserv
     }
     cout << "Connected to server." << endl;
     cout << "Sending request to server..." << endl;
-    char request = message + '\n' + microservice;
-    strcpy(outBuffer, (char *)request);
+    string request = message + '\n' + microservice;
+    strcpy(outBuffer, (char *)request.c_str());
     bytesSent = send(serverSocket, outBuffer, BUFFERSIZE, 0);
     if (bytesSent < 0)
     {
@@ -68,23 +66,27 @@ void sendRequestToServer(string serverIp, int port, char message, char microserv
 
 void startClientServer(string serverIp, int port)
 {
-    char userMessage, microService;
-    int userChoice;
-    while (userChoice != 3)
+    cout << "\n##############################################"
+         << "\n#        Data Transformation Services        #"
+         << "\n##############################################\n\n";
+    string userMessage, microService;
+    string userChoice;
+    while (userChoice != "3")
     {
         userChoice = printUserOptions();
-        if (userChoice == 1)
+        if (userChoice == "1")
         {
             cout << "Enter your message: ";
-            cin >> userMessage;
+            getline(cin, userMessage, '\n');
+            cout << "Message saved." << endl;
         }
-        else if (userChoice == 2)
+        else if (userChoice == "2")
         {
             cout << "Enter the microservice(s) you want to run your message on: ";
-            cin >> microService;
+            getline(cin, microService, '\n');
             sendRequestToServer(serverIp, port, userMessage, microService);
         }
-        else if (userChoice == 3)
+        else if (userChoice == "3")
         {
             cout << "Exiting program..." << endl;
             break;
