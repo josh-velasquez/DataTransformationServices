@@ -60,7 +60,7 @@ void sendRequestToServer(string serverIp, int port, string message, string micro
         exit(1);
     }
     cout << "Server response received." << endl;
-    cout << inBuffer << endl;
+    cout << "\nServer response: " << inBuffer << endl;
     close(serverSocket);
 }
 

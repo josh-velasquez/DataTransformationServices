@@ -1,4 +1,9 @@
 
+/**
+ * Joshua Velasquez
+ * February 28, 2020
+ * This micro service converts the server request to upper cases
+*/
 #include <unistd.h>
 #include <stdio.h>
 #include <string>
@@ -23,51 +28,57 @@ string toUpper(string text)
 
 void startUpperMicroService(string serverIp, int port)
 {
-    cout << "#########################################" << endl;
-    cout << "\nUpper Micro Service" << endl;
-    cout << "#########################################" << endl;
-    int serverSocket, bytesSent, bytesRecv;
+    int clientSocket, bytesSent, bytesRecv;
+    struct sockaddr_in serverAddress, clientAddress;
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
-    struct sockaddr_in serverAddress;
-    if ((serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+    socklen_t sockLen;
+    cout << "#########################################" << endl;
+    cout << "\tUpper Micro Service" << endl;
+    cout << "#########################################" << endl;
+
+    if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
         cout << "socket() failed" << endl;
         exit(1);
     }
     serverAddress.sin_family = AF_INET;
+    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
     serverAddress.sin_port = htons(port);
-    serverAddress.sin_addr.s_addr = inet_addr(serverIp.c_str());
 
-    cout << "Connecting to server..." << endl;
-    if (connect(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+    if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cout << "connect() failed" << endl;
-        exit(1);
+        cout << "bind() failed" << endl;
     }
-    cout << "Connected to server." << endl;
-    cout << "Receiving request from server..." << endl;
-    bytesRecv = recv(serverSocket, inBuffer, BUFFERSIZE, 0);
-    if (bytesRecv < 0)
+
+    sockLen = sizeof(clientAddress);
+    while (true)
     {
-        cout << "recv() failed" << endl;
-        exit(1);
+        cout << "\n\nWaiting for client requests..." << endl;
+        bytesRecv = recvfrom(clientSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, &sockLen);
+        if (bytesRecv < 0)
+        {
+            cout << "recv() failed" << endl;
+            exit(1);
+        }
+        cout << "Client request received..." << endl;
+        cout << "Modifying response..." << endl;
+        string response = toUpper(inBuffer);
+        strcpy(outBuffer, response.c_str());
+        cout << "Sending response to client..." << endl;
+        bytesSent = sendto(clientSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, sizeof(serverAddress));
+        if (bytesSent < 0)
+        {
+            cout << "send() failed" << endl;
+            exit(1);
+        }
+        cout << "Response sent to client." << endl;
+        cout << "Response: " << outBuffer << endl;
     }
-    cout << "Server request received." << endl;
-    string response = toUpper(inBuffer);
-    strcpy(outBuffer, response.c_str());
-    cout << "Sending response to server..." << endl;
-    bytesSent = send(serverSocket, outBuffer, BUFFERSIZE, 0);
-    if (bytesSent < 0)
-    {
-        cout << "send() failed" << endl;
-        exit(1);
-    }
-    cout << "Response sent to server." << endl;
 }
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
         cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
         exit(1);

@@ -65,22 +65,13 @@ static void startMicroServices(string targetIp, int port)
 
 string connectToMicroService(string microservice, string targetIp, int port, string message)
 {
-    int serverSocket, bytesSent, bytesRecv;
+    int bytesSent, bytesRecv;
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
-    // Socket microserviceSocket = Socket();
-    // createSocket(targetIp, port, microserviceSocket, SOCK_DGRAM, IPPROTO_UDP);
-    struct sockaddr_in server;
-    if ((serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-    {
-        cout << "socket() failed" << endl;
-    }
-    memset((char *)&server, 0, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    server.sin_addr.s_addr = inet_addr(targetIp.c_str());
+    Socket microserviceSocket = Socket();
+    createSocket(targetIp, port, microserviceSocket, SOCK_DGRAM, IPPROTO_UDP);
     cout << "Sending request to " << microservice << " microservice..." << endl;
     strcpy(outBuffer, message.c_str());
-    bytesSent = sendto(serverSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&server, sizeof(server));
+    bytesSent = sendto(microserviceSocket.socketVal, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, sizeof(microserviceSocket.address));
     if (bytesSent < 0)
     {
         cout << "sendto() failed" << endl;
@@ -88,10 +79,10 @@ string connectToMicroService(string microservice, string targetIp, int port, str
     }
     cout << "Request sent to " << microservice << " microservice." << endl;
     cout << "Waiting for " << microservice << " microservice response..." << endl;
-    bytesRecv = recvfrom(serverSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&server, (socklen_t *)&server);
+    bytesRecv = recvfrom(microserviceSocket.socketVal, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, (socklen_t *)&microserviceSocket.address);
     if (bytesRecv < 0)
     {
-        cout << "recv() failed" << endl;
+        cout << "recvfrom() failed" << endl;
         exit(1);
     }
     cout << "Response from " << microservice << " microservice received." << endl;
@@ -139,6 +130,7 @@ void sendMicroServiceResponseToClient(int clientSocket, string message)
     {
         cout << "send() failed" << endl;
     }
+    cout << "Forwarded microservice response to client..." << endl;
 }
 
 /**
@@ -157,7 +149,7 @@ void processClientRequest(string targetIp, int port, int clientSocket, string us
     char microservice;
     string newUserMessage;
     cout << "Starting microservices..." << endl;
-    // startMicroServices(targetIp, port);
+    startMicroServices(targetIp, port);
     cout << "Microservices on standby." << endl;
     for (int i = 0; i < microservices.length(); i++)
     {
@@ -201,7 +193,6 @@ void processClient(string targetIp, int port, int clientSocket)
         cout << "recv() failed" << endl;
     }
     cout << "Client request received." << endl;
-    // cout << inBuffer << endl;
     processClientRequest(targetIp, port, clientSocket, inBuffer);
 }
 
@@ -223,13 +214,13 @@ void startDataTransformationServer(string targetIpAddress, int port)
     {
         errorEncountered("listen()", "Failed", true);
     }
-    cout << "Server listening for client connections..." << endl;
     while (true)
     {
         struct sockaddr_in clientAddress;
         int client = sizeof(struct sockaddr);
         cout << "\n########################################################################\n"
              << endl;
+        cout << "Server listening for client connections..." << endl;
         dataSocket = accept(proxy.socketVal, (struct sockaddr *)&clientAddress, (socklen_t *)&client);
         if (dataSocket < 0)
         {
@@ -238,7 +229,6 @@ void startDataTransformationServer(string targetIpAddress, int port)
         cout << "Client connected: " << inet_ntoa(clientAddress.sin_addr) << endl;
         cout << "Processing client..." << endl;
         processClient(targetIpAddress, port, dataSocket);
-        // cout << "Forwarded client request successfully." << endl;
         close(dataSocket);
     }
 }
