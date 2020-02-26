@@ -24,7 +24,8 @@ portNum=$2
 echo "Starting microservices..."
 echo "Starting Identity microservice..."
 portNum=$((portNum+1))
-gnome-terminal -x sh -c './identity '"$1 $portNum"
+# gnome-terminal -x sh -c './identity '"$1 $portNum"
+# xterm -hold -e './identity '"$1 $portNum"
 # zsh -c './identity '"$1 $portNum"
 # open -a Terminal -n './identity '"$1 $portNum"
 

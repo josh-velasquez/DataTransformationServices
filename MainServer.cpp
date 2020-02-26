@@ -1,3 +1,10 @@
+/**
+ * Joshua Velasquez
+ * February 28, 2020
+ * Main server that processes the clients requests and forwards them to micro services.
+ * Once the micro services replies back with a response, the response is sent back to 
+ * the server which is then forwarded to the client
+*/
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
