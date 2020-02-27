@@ -31,6 +31,9 @@ void errorEncountered(string type, string status, bool quit)
     }
 }
 
+/**
+ * Encrypts words to using caesar cypher with an offset of 13
+*/
 string toCaesar(string text)
 {
     int shift = 13;
@@ -54,7 +57,10 @@ string toCaesar(string text)
     return newMessage;
 }
 
-void startCaesarMicroService(string serverIp, int port)
+/**
+ * Starts the caesar micro service
+*/
+void startCaesarMicroService(int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
@@ -103,11 +109,11 @@ void startCaesarMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        cout << "Usage: " << argv[0] << " <Target Port>" << endl;
         exit(1);
     }
-    startCaesarMicroService(argv[1], atoi(argv[2]));
+    startCaesarMicroService(atoi(argv[1]));
     return 0;
 }

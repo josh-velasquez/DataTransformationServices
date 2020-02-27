@@ -21,6 +21,9 @@ void errorEncountered(string type, string status, bool quit)
     }
 }
 
+/**
+ * Prints user options
+*/
 string printUserOptions()
 {
     string userChoice;
@@ -34,7 +37,10 @@ string printUserOptions()
     return userChoice;
 }
 
-void sendRequestToServer(string serverIp, int port, string message, string microservice)
+/**
+ * Sends client request to server
+*/
+void sendRequestToServer(int port, string message, string microservice)
 {
     int serverSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress;
@@ -46,7 +52,7 @@ void sendRequestToServer(string serverIp, int port, string message, string micro
     }
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
-    serverAddress.sin_addr.s_addr = inet_addr(serverIp.c_str());
+    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 
     cout << "Connecting to server..." << endl;
     if (connect(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
@@ -74,7 +80,10 @@ void sendRequestToServer(string serverIp, int port, string message, string micro
     close(serverSocket);
 }
 
-void startClientServer(string serverIp, int port)
+/**
+ * Starts the client server and prompts the user for actions
+*/
+void startClientServer(int port)
 {
     cout << "\n##############################################"
          << "\n#        Data Transformation Services        #"
@@ -94,7 +103,7 @@ void startClientServer(string serverIp, int port)
         {
             cout << "Enter the microservice(s) you want to run your message on: ";
             getline(cin, microService, '\n');
-            sendRequestToServer(serverIp, port, userMessage, microService);
+            sendRequestToServer(port, userMessage, microService);
         }
         else if (userChoice == "3")
         {
@@ -110,6 +119,18 @@ void startClientServer(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    startClientServer(argv[1], atoi(argv[2]));
+    switch (argc)
+    {
+    case 1:
+        // Default is port 8080
+        startClientServer(8080);
+        break;
+    case 2:
+        startClientServer(atoi(argv[1]));
+        break;
+    default:
+        cout << "Usage: " << argv[0] << "<Target Port>" << endl;
+        exit(1);
+    }
     return 0;
 }

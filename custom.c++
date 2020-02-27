@@ -2,7 +2,7 @@
 /**
  * Joshua Velasquez
  * February 28, 2020
- * This micro service converts the server request to pig latin
+ * This micro service converts the server request to l33t code
 */
 #include <unistd.h>
 #include <stdio.h>
@@ -31,39 +31,40 @@ void errorEncountered(string type, string status, bool quit)
 }
 
 /**
- * Converts text to pig latin
+ * Converts text to l33t code
 */
-string toPigLatin(string text)
+string toL33t(string text)
 {
     string newText = "";
-    string vowels = "aeiou";
-    char *word = strtok((char *)&text, " ");
-
-    while (word != NULL)
+    string letters = "abegiopstz";
+    string leet = "4836109572";
+    int pos;
+    for (int i = 0; i < text.length(); i++)
     {
-        if (vowels.find(word[0]) == string::npos)
+        pos = letters.find(text[i]);
+        if (pos != string::npos)
         {
-            newText = text.substr(1, strlen(word) - 1);
+            newText += leet[pos];
         }
         else
         {
-            newText += word;
+            newText += text[i];
         }
-        newText += "ay";
-
-        word = strtok(NULL, " ");
     }
     return newText;
 }
 
-void startCustomMicroService(string serverIp, int port)
+/**
+ * Starts the custom micro service (converts strings to pig latin)
+*/
+void startCustomMicroService(int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     socklen_t sockLen;
     cout << "#########################################" << endl;
-    cout << "\tIdentity Micro Service" << endl;
+    cout << "\tL33t Micro Service" << endl;
     cout << "#########################################" << endl;
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
@@ -90,7 +91,7 @@ void startCustomMicroService(string serverIp, int port)
         }
         cout << "Client request received..." << endl;
         cout << "Modifying response..." << endl;
-        string response = toPigLatin(inBuffer);
+        string response = toL33t(inBuffer);
         strcpy(outBuffer, response.c_str());
         cout << "Sending response to client..." << endl;
         bytesSent = sendto(clientSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, sizeof(serverAddress));
@@ -105,11 +106,11 @@ void startCustomMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        cout << "Usage: " << argv[0] << " <Target Port>" << endl;
         exit(1);
     }
-    startCustomMicroService(argv[1], atoi(argv[2]));
+    startCustomMicroService(atoi(argv[1]));
     return 0;
 }

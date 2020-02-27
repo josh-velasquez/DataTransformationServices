@@ -31,6 +31,9 @@ void errorEncountered(string type, string status, bool quit)
     }
 }
 
+/**
+ * Converts strings to lower cases
+*/
 string toLower(string text)
 {
     string newString = "";
@@ -40,7 +43,10 @@ string toLower(string text)
     return newString;
 }
 
-void startLowerMicroService(string serverIp, int port)
+/**
+ * Starts the lower micro service
+*/
+void startLowerMicroService(int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
@@ -89,11 +95,11 @@ void startLowerMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        cout << "Usage: " << argv[0] << " <Target Port>" << endl;
         exit(1);
     }
-    startLowerMicroService(argv[1], atoi(argv[2]));
+    startLowerMicroService(atoi(argv[1]));
     return 0;
 }

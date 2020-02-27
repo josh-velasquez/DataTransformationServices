@@ -34,7 +34,10 @@ string toReverse(string text)
     return text;
 }
 
-void startReverseMicroService(string serverIp, int port)
+/**
+ * Starts the reverse micro service
+*/
+void startReverseMicroService(int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
@@ -49,7 +52,7 @@ void startReverseMicroService(string serverIp, int port)
         errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
+    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddress.sin_port = htons(port);
 
     if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
@@ -83,11 +86,11 @@ void startReverseMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        cout << "Usage: " << argv[0] << " <Target Port>" << endl;
         exit(1);
     }
-    startReverseMicroService(argv[1], atoi(argv[2]));
+    startReverseMicroService(atoi(argv[1]));
     return 0;
 }

@@ -30,12 +30,18 @@ void errorEncountered(string type, string status, bool quit)
     }
 }
 
+/**
+ * Returns the user text as is
+*/
 string toIdentity(string text)
 {
     return text;
 }
 
-void startIdentityMicroService(string serverIp, int port)
+/**
+ * Starts the identity micro service
+*/
+void startIdentityMicroService(int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
@@ -50,7 +56,7 @@ void startIdentityMicroService(string serverIp, int port)
         errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
+    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddress.sin_port = htons(port);
 
     if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
@@ -84,14 +90,11 @@ void startIdentityMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    cout << argv[0] << endl;
-    cout << argv[1] << endl;
-    cout << argv[2] << endl;
-    if (argc != 3)
+    if (argc != 2)
     {
-        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        cout << "Usage: " << argv[0] << " <Target Port>" << endl;
         exit(1);
     }
-    startIdentityMicroService(argv[1], atoi(argv[2]));
+    startIdentityMicroService(atoi(argv[1]));
     return 0;
 }

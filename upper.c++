@@ -31,6 +31,9 @@ void errorEncountered(string type, string status, bool quit)
     }
 }
 
+/**
+ * Converts strings to all upper cases
+*/
 string toUpper(string text)
 {
     string newString = "";
@@ -40,7 +43,10 @@ string toUpper(string text)
     return newString;
 }
 
-void startUpperMicroService(string serverIp, int port)
+/**
+ * Starts the upper micro service
+*/
+void startUpperMicroService(int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
@@ -89,11 +95,11 @@ void startUpperMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
+        cout << "Usage: " << argv[0] << " <Target Port>" << endl;
         exit(1);
     }
-    startUpperMicroService(argv[1], atoi(argv[2]));
+    startUpperMicroService(atoi(argv[1]));
     return 0;
 }
