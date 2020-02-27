@@ -260,7 +260,7 @@ void startDataTransformationServer(int port)
         errorEncountered("listen()", "Failed", true);
     }
     cout << "\n\nStarting microservices..." << endl;
-    // startMicroServices(port);
+    startMicroServices(port);
     cout << "Microservices on standby." << endl;
     while (true)
     {
