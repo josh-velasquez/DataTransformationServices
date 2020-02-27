@@ -40,7 +40,7 @@ string toL33t(string text)
     string lowerLetters = "abegiopstz";
     string upperLetters = "ABEGIOPSTZ";
     string leet = "4836109572";
-    int lpos,upos;
+    int lpos, upos;
     for (int i = 0; i < text.length(); i++)
     {
         lpos = lowerLetters.find(text[i]);
@@ -48,7 +48,9 @@ string toL33t(string text)
         if (lpos != string::npos)
         {
             newText += leet[lpos];
-        } else if (upos != string::npos) {
+        }
+        else if (upos != string::npos)
+        {
             newText += leet[upos];
         }
         else
