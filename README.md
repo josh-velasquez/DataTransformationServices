@@ -1,6 +1,7 @@
 # DataTransformationServices
 
 Consists of six micro services that can alter user data sent from a client to the server.
+This was primarily tested on MACOS with zsh terminal and MX Linux with x-terminal.
 
 # Running on Linux terminal
 
