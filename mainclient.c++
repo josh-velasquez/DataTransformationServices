@@ -1,3 +1,24 @@
+/**
+ * Joshua Velasquez
+ * February 28, 2020
+ * Main client ui that prompts the user how they would like to modify their request.
+ * Once the use saves a message, they can start to run the micro services to modify
+ * their request.
+ * Micro services available:
+ * There are six microservices available: 
+ *  1. Identity 
+ *        - Returns the client request as is 
+ *  2. Reverse 
+ *       - Reverses the client request 
+ *   3. Upper 
+ *       - Converts client request to all upper cases 
+ *   4. Lower 
+ *       - Converts client request to all lower cases 
+ *   5. Caesar 
+ *       - Encrypts user request using the Caesar cypher with an offset of 13 
+ *   6. Custom 
+ *       - Converts client request to l33t
+*/
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <iostream>
@@ -46,7 +67,6 @@ void sendRequestToServer(int port, string message, string microservice)
     int serverSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress;
     char inBuffer[10 * BUFFERSIZE], outBuffer[10 * BUFFERSIZE];
-
     if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
         errorEncountered("socket()", "Failed", true);

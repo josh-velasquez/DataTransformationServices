@@ -3,7 +3,7 @@
  * February 28, 2020
  * Main server that processes the clients requests and forwards them to micro services.
  * Once the micro services replies back with a response, the response is sent back to 
- * the server which is then forwarded to the client
+ * the server which is then forwarded to the client.
 */
 #include <unistd.h>
 #include <stdio.h>
@@ -45,11 +45,9 @@ static void createSocket(int port, Socket &targetSocket, int sock, int socketTyp
 {
     int socketVal;
     struct sockaddr_in address;
-
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_ANY);
     address.sin_port = htons(port);
-
     if ((socketVal = socket(AF_INET, sock, socketType)) < 0)
     {
         errorEncountered("socket()", "Failed", true);
@@ -88,8 +86,8 @@ string connectToMicroService(string microservice, int port, string message)
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     Socket microserviceSocket = Socket();
     socklen_t sockLen;
+    // Create a UDP connection with micro services
     createSocket(port, microserviceSocket, SOCK_DGRAM, IPPROTO_UDP);
-
     cout << "\nSending request to " << microservice << " microservice..." << endl;
     strcpy(outBuffer, message.c_str());
     bytesSent = sendto(microserviceSocket.socketVal, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, sizeof(microserviceSocket.address));

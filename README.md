@@ -1,21 +1,30 @@
 # DataTransformationServices
 
-Consists of microservices that can alter user data sent from a client to the server
-
-# Running the program
-
-Open two terminals, one for server and one for client (The micro services will be automatically launched by the mainserver program)
-./makefile <Target Port>
-The port of the client and server must match
+Consists of six micro services that can alter user data sent from a client to the server.
 
 # Running on Linux terminal
 
 Navigate to startMicroServices.sh and comment out the osascript -e command and uncomment the  x-terminal-emulator -e (if you need to, otherwise don't change anything)
-NOTE: You need to have x-terminal-emulator installed prior to running everything
+NOTE: You need to have x-terminal-emulator installed prior to running anything
 
 # Running on MacOS terminal
 
 Navigate to startMicroServices.sh and comment out the x-terminal-emulator -e and uncomment the osascript -e command (if you need to, otherwise don't change anything)
+
+# Running the program
+
+Open two terminals, one for server and one for client (The micro services will be automatically launched by the mainserver program)
+./main <Target Port>
+./client <Target Port>
+If you don't provide a target port for both server and client, the default port will be set to 8080.
+The port of the client and server must match.
+
+# Manual Launch of Microservices
+
+If you don't have x-terminal-emulator or on a macos, you can manually deploy the micro services by launching them one by one. To launch them one by one, first comment out the startMicroservices(port) line in the mainserver file on line 261. Once commented out, you can manually compile and launch the micro services into separate terminals.
+NOTE: Ensure that the port assigned to each micro service is in ascending order.
+i.e. if the main server and client are launched on port 4000, the identity micro service MUST be launched on port 4001, the reverse micro service MUST be launched on port 4002, the upper micro service MUST be launched on port 4003, the lower micro service MUST be launched on port 4004, the caesar micro service MUST be launched on port 4005, and the custom micro service MUST be launched on port 4006.
+The order of the ports matter as they are assigned that way in the main server to prevent using the same ports as the main server.
 
 # Microservices
 
