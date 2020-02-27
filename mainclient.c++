@@ -55,7 +55,7 @@ void sendRequestToServer(int port, string message, string microservice)
     serverAddress.sin_port = htons(port);
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    cout << "Connecting to server..." << endl;
+    cout << "\nConnecting to server..." << endl;
     if (connect(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
         errorEncountered("connect()", "Failed", true);
@@ -108,12 +108,13 @@ void startClientServer(int port)
         }
         else if (userChoice == "3")
         {
-            cout << "Exiting program..." << endl;
+            cout << "Exiting program...\n"
+                 << endl;
             break;
         }
         else
         {
-            cout << "\n\nInvalid input." << endl;
+            cout << "\nInvalid input." << endl;
         }
     }
 }

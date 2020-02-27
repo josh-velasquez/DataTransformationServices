@@ -59,11 +59,23 @@ static void createSocket(int port, Socket &targetSocket, int sock, int socketTyp
 }
 
 /**
+ * Gets the current directory
+ * This is needed to run the scripts for starting the micro services
+*/
+string getCurrentDirectory()
+{
+    char buff[FILENAME_MAX];
+    getcwd(buff, FILENAME_MAX);
+    string currentDir(buff);
+    return currentDir;
+}
+
+/**
  * Starts the microservices servers by invoking a shell script
 */
 static void startMicroServices(int port)
 {
-    string command = "./startMicroServices.sh " + to_string(port);
+    string command = "./startMicroServices.sh " + getCurrentDirectory() + " " + to_string(port);
     system(command.c_str());
 }
 
@@ -248,7 +260,7 @@ void startDataTransformationServer(int port)
         errorEncountered("listen()", "Failed", true);
     }
     cout << "\n\nStarting microservices..." << endl;
-    startMicroServices(port);
+    // startMicroServices(port);
     cout << "Microservices on standby." << endl;
     while (true)
     {

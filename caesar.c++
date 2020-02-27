@@ -50,9 +50,13 @@ string toCaesar(string text)
         {
             newMessage += char(int(text[i] + shift - 65) % 26 + 65);
         }
-        else
+        else if (islower(text[i]))
         {
             newMessage += char(int(text[i] + shift - 97) % 26 + 97);
+        }
+        else
+        {
+            newMessage += text[i];
         }
     }
     return newMessage;

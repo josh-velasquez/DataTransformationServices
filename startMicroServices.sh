@@ -15,40 +15,41 @@ echo "Compiling Custom micro service..."
 g++ ./custom.c++ -o custom
 echo "Finished compiling micro services.\n"
 
-# zsh -c is for running on zsh terminal
-# gnome-terminal -x sh -c is for linux
-# $1 will have the server ip address
+# osascript -e is for running on zsh terminal (macos) using apple script
+# x-terminal-emulator -e is for linux
+# $1 will have the working directory
 # $2 will have the port number
 
-portNum=$1
+portNum=$2
 echo "Starting Identity microservice..."
 portNum=$((portNum+1))
-x-terminal-emulator -e ./holdTerminal.sh ./identity $portNum
-# zsh -c './identity '"$1 $portNum"
+# x-terminal-emulator -e ./holdTerminal.sh ./identity $portNum
+osascript -e 'tell app "Terminal" to do script "cd '$1' | '$1'/identity '$portNum'"'
+
 
 echo "Starting Reverse microservice..."
 portNum=$((portNum+1))
-x-terminal-emulator -e ./holdTerminal.sh ./reverse $portNum
-# zsh -c './reverse '"$1 $portNum"
+# x-terminal-emulator -e ./holdTerminal.sh ./reverse $portNum
+osascript -e 'tell app "Terminal" to do script "cd '$1' | '$1'/reverse '$portNum'"'
 
 echo "Starting Upper microservice..."
 portNum=$((portNum+1))
-x-terminal-emulator -e ./holdTerminal.sh ./upper $portNum
-# zsh -c './upper '"$1 $portNum"
+# x-terminal-emulator -e ./holdTerminal.sh ./upper $portNum
+osascript -e 'tell app "Terminal" to do script "cd '$1' | '$1'/upper '$portNum'"'
 
 echo "Starting Lower microservice..."
 portNum=$((portNum+1))
-x-terminal-emulator -e ./holdTerminal.sh ./lower $portNum
-# zsh -c './lower '"$1 $portNum"
+# x-terminal-emulator -e ./holdTerminal.sh ./lower $portNum
+osascript -e 'tell app "Terminal" to do script "cd '$1' | '$1'/lower '$portNum'"'
 
 echo "Starting Caesar microservice..."
 portNum=$((portNum+1))
-x-terminal-emulator -e ./holdTerminal.sh ./caesar $portNum
-# zsh -c './caesar '"$1 $portNum"
+# x-terminal-emulator -e ./holdTerminal.sh ./caesar $portNum
+osascript -e 'tell app "Terminal" to do script "cd '$1' | '$1'/caesar '$portNum'"'
 
 echo "Starting Custom microservice..."
 portNum=$((portNum+1))
-x-terminal-emulator -e ./holdTerminal.sh ./custom $portNum
-# zsh -c './custom '"$1 $portNum"
+# x-terminal-emulator -e ./holdTerminal.sh ./custom $portNum
+osascript -e 'tell app "Terminal" to do script "cd '$1' | '$1'/custom '$portNum'"'
 
 echo "Successfully started microservices."

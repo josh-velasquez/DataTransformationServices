@@ -4,17 +4,18 @@ Consists of microservices that can alter user data sent from a client to the ser
 
 # Running the program
 
-Open two terminals, one for server and one for client
-./makefile<Target Port>
+Open two terminals, one for server and one for client (The micro services will be automatically launched by the mainserver program)
+./makefile <Target Port>
 The port of the client and server must match
 
 # Running on Linux terminal
 
-Navigate to StartMicroServices.sh and replace the zsh -c commands with x-terminal-emulator -e ./holdTerminal.sh (if you need to, otherwise don't change anything)
+Navigate to startMicroServices.sh and comment out the osascript -e command and uncomment the  x-terminal-emulator -e (if you need to, otherwise don't change anything)
+NOTE: You need to have x-terminal-emulator installed prior to running everything
 
 # Running on MacOS terminal
 
-Depending on your default mac terminal, if your terminal is running the zsh shell, replace the gnome-terminal -e with zsh -c instead (if you need to, otherwise don't change anything)
+Navigate to startMicroServices.sh and comment out the x-terminal-emulator -e and uncomment the osascript -e command (if you need to, otherwise don't change anything)
 
 # Microservices
 
