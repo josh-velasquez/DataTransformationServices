@@ -1,13 +1,8 @@
 
-/**
- * Joshua Velasquez
- * February 28, 2020
- * This micro service returns the server request as is
-*/
 #include <unistd.h>
 #include <stdio.h>
-#include <iostream>
 #include <string>
+#include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,25 +11,42 @@ using namespace std;
 
 const int BUFFERSIZE = 2048;
 
-string toIdentity(string text)
+/**
+ * Prints errors and exits program
+*/
+void errorEncountered(string type, string status, bool quit)
 {
+    cout << "Error encountered: " << type << endl;
+    cout << "Status: " << status << endl;
+    if (quit)
+    {
+        cout << "Exiting program..." << endl;
+        exit(1);
+    }
+}
+
+/**
+ * Reverses strings
+*/
+string toReverse(string text)
+{
+    reverse(text.begin(), text.end());
     return text;
 }
 
-void startIdentityMicroService(string serverIp, int port)
+void startReverseMicroService(string serverIp, int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     socklen_t sockLen;
     cout << "#########################################" << endl;
-    cout << "\tIdentity Micro Service" << endl;
+    cout << "\tReverse Micro Service" << endl;
     cout << "#########################################" << endl;
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        cout << "socket() failed" << endl;
-        exit(1);
+        errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
@@ -42,7 +54,7 @@ void startIdentityMicroService(string serverIp, int port)
 
     if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cout << "bind() failed" << endl;
+        errorEncountered("bind()", "Failed", true);
     }
 
     sockLen = sizeof(clientAddress);
@@ -52,19 +64,17 @@ void startIdentityMicroService(string serverIp, int port)
         bytesRecv = recvfrom(clientSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, &sockLen);
         if (bytesRecv < 0)
         {
-            cout << "recv() failed" << endl;
-            exit(1);
+            errorEncountered("recvfrom()", "Failed", true);
         }
         cout << "Client request received..." << endl;
         cout << "Modifying response..." << endl;
-        string response = toIdentity(inBuffer);
+        string response = toReverse(inBuffer);
         strcpy(outBuffer, response.c_str());
         cout << "Sending response to client..." << endl;
         bytesSent = sendto(clientSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, sizeof(serverAddress));
         if (bytesSent < 0)
         {
-            cout << "send() failed" << endl;
-            exit(1);
+            errorEncountered("sendto()", "Failed", true);
         }
         cout << "Response sent to client." << endl;
         cout << "Response: " << outBuffer << endl;
@@ -73,14 +83,11 @@ void startIdentityMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
-    cout << argv[0] << endl;
-    cout << argv[1] << endl;
-    cout << argv[2] << endl;
     if (argc != 3)
     {
         cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
         exit(1);
     }
-    startIdentityMicroService(argv[1], atoi(argv[2]));
+    startReverseMicroService(argv[1], atoi(argv[2]));
     return 0;
 }

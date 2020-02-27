@@ -70,6 +70,9 @@ static void startMicroServices(string targetIp, int port)
     system(command.c_str());
 }
 
+/**
+ * Establishes a connection with the micro services
+*/
 string connectToMicroService(string microservice, string targetIp, int port, string message)
 {
     int bytesSent, bytesRecv;
@@ -81,51 +84,70 @@ string connectToMicroService(string microservice, string targetIp, int port, str
     bytesSent = sendto(microserviceSocket.socketVal, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, sizeof(microserviceSocket.address));
     if (bytesSent < 0)
     {
-        cout << "sendto() failed" << endl;
-        exit(1);
+        errorEncountered("sendto()", "Failed", true);
     }
     cout << "Request sent to " << microservice << " microservice." << endl;
     cout << "Waiting for " << microservice << " microservice response..." << endl;
     bytesRecv = recvfrom(microserviceSocket.socketVal, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, (socklen_t *)&microserviceSocket.address);
     if (bytesRecv < 0)
     {
-        cout << "recvfrom() failed" << endl;
-        exit(1);
+        errorEncountered("recvfrom()", "Failed", true);
     }
     cout << "Response from " << microservice << " microservice received." << endl;
     return inBuffer;
 }
 
+/**
+ * Runs the identity micro service
+*/
 string runIdentityMicroService(string targetIp, int port, string message)
 {
     return connectToMicroService("identity", targetIp, port, message);
 }
 
+/**
+ * Runs the reverse micro service
+*/
 string runReverseMicroService(string targetIp, int port, string message)
 {
     return connectToMicroService("reverse", targetIp, port, message);
 }
 
+/**
+ * Runs the upper micro service
+*/
 string runUpperMicroService(string targetIp, int port, string message)
 {
     return connectToMicroService("upper", targetIp, port, message);
 }
 
+/**
+ * Runs the lower micro service
+*/
 string runLowerMicroService(string targetIp, int port, string message)
 {
     return connectToMicroService("lower", targetIp, port, message);
 }
 
+/**
+ * Runs the caesar micro service
+*/
 string runCaesarMicroService(string targetIp, int port, string message)
 {
     return connectToMicroService("caesar", targetIp, port, message);
 }
 
+/**
+ * Runs the custom micro service
+*/
 string runCustomMicroService(string targetIp, int port, string message)
 {
     return connectToMicroService("custom", targetIp, port, message);
 }
 
+/**
+ * Forwards the micro service response from the server to the client
+*/
 void sendMicroServiceResponseToClient(int clientSocket, string message)
 {
     int bytesSent;
@@ -135,12 +157,14 @@ void sendMicroServiceResponseToClient(int clientSocket, string message)
     bytesSent = send(clientSocket, outBuffer, BUFFERSIZE, 0);
     if (bytesSent < 0)
     {
-        cout << "send() failed" << endl;
+        errorEncountered("send()", "Failed", true);
     }
     cout << "Forwarded microservice response to client..." << endl;
 }
 
 /**
+ * Invokes the micro services script and parses our the user input
+ * 
  * NOTE: The ports are incremented respestively so they can run on their own ports 
  * (this value should correspond to the port values assigned in the bash script that 
  * auto launches the microservices)
@@ -188,6 +212,9 @@ void processClientRequest(string targetIp, int port, int clientSocket, string us
     sendMicroServiceResponseToClient(clientSocket, newUserMessage);
 }
 
+/**
+ * Waits for connected client's request
+*/
 void processClient(string targetIp, int port, int clientSocket)
 {
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE], savedMessage[BUFFERSIZE];
@@ -196,12 +223,15 @@ void processClient(string targetIp, int port, int clientSocket)
     bytesRecv = recv(clientSocket, (char *)&inBuffer, BUFFERSIZE, 0);
     if (bytesRecv < 0)
     {
-        cout << "recv() failed" << endl;
+        errorEncountered("recv()", "Failed", true);
     }
     cout << "Client request received." << endl;
     processClientRequest(targetIp, port, clientSocket, inBuffer);
 }
 
+/**
+ * Creates the socket for the server and prepares it for listening
+*/
 void startDataTransformationServer(string targetIpAddress, int port)
 {
     int dataSocket;

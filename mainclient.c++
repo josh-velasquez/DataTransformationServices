@@ -7,6 +7,20 @@ using namespace std;
 
 const int BUFFERSIZE = 2048;
 
+/**
+ * Prints errors and exits program
+*/
+void errorEncountered(string type, string status, bool quit)
+{
+    cout << "Error encountered: " << type << endl;
+    cout << "Status: " << status << endl;
+    if (quit)
+    {
+        cout << "Exiting program..." << endl;
+        exit(1);
+    }
+}
+
 string printUserOptions()
 {
     string userChoice;
@@ -28,8 +42,7 @@ void sendRequestToServer(string serverIp, int port, string message, string micro
 
     if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
-        cout << "socket() failed" << endl;
-        exit(1);
+        errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
@@ -38,8 +51,7 @@ void sendRequestToServer(string serverIp, int port, string message, string micro
     cout << "Connecting to server..." << endl;
     if (connect(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cout << "connect() failed" << endl;
-        exit(1);
+        errorEncountered("connect()", "Failed", true);
     }
     cout << "Connected to server." << endl;
     cout << "Sending request to server..." << endl;
@@ -48,16 +60,14 @@ void sendRequestToServer(string serverIp, int port, string message, string micro
     bytesSent = send(serverSocket, outBuffer, BUFFERSIZE, 0);
     if (bytesSent < 0)
     {
-        cout << "send() failed" << endl;
-        exit(1);
+        errorEncountered("send()", "Failed", true);
     }
     cout << "Request sent." << endl;
     cout << "Waiting for server response..." << endl;
     bytesRecv = recv(serverSocket, inBuffer, BUFFERSIZE, 0);
     if (bytesRecv < 0)
     {
-        cout << "recv() failed" << endl;
-        exit(1);
+        errorEncountered("recv()", "Failed", true);
     }
     cout << "Server response received." << endl;
     cout << "\nServer response: " << inBuffer << endl;

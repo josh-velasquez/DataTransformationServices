@@ -2,17 +2,17 @@
 
 echo "Compiling micro services..."
 echo "Compiling Identity micro service..."
-g++ ./Identity.cpp -o identity
+g++ ./identity.c++ -o identity
 # echo "Compiling Reverse micro service..."
-# g++ ./Reverse.cpp -o reverse
+# g++ ./reverse.c++ -o reverse
 # echo "Compiling Upper micro service..."
-# g++ ./Upper.cpp -o upper
+# g++ ./upper.c++ -o upper
 # echo "Compiling Lower micro service..."
-# g++ ./Lower.cpp -o lower
+# g++ ./lower.c++ -o lower
 # echo "Compiling Caesar micro service..."
-# g++ ./Caesar.cpp -o caesar
+# g++ ./caesar.c++ -o caesar
 # echo "Compiling Custom micro service..."
-# g++ ./Custom.cpp -o custom
+# g++ ./custom.c++ -o custom
 # echo "Finished compiling micro services.\n"
 
 # zsh -c is for running on zsh terminal

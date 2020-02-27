@@ -17,6 +17,20 @@ using namespace std;
 
 const int BUFFERSIZE = 2048;
 
+/**
+ * Prints errors and exits program
+*/
+void errorEncountered(string type, string status, bool quit)
+{
+    cout << "Error encountered: " << type << endl;
+    cout << "Status: " << status << endl;
+    if (quit)
+    {
+        cout << "Exiting program..." << endl;
+        exit(1);
+    }
+}
+
 string toCaesar(string text)
 {
     int shift = 13;
@@ -24,7 +38,11 @@ string toCaesar(string text)
     string newMessage = "";
     for (int i = 0; i < text.length(); i++)
     {
-        if (isupper(text[i]))
+        if (text[i] == ' ')
+        {
+            newMessage += " ";
+        }
+        else if (isupper(text[i]))
         {
             newMessage += char(int(text[i] + shift - 65) % 26 + 65);
         }
@@ -48,8 +66,7 @@ void startCaesarMicroService(string serverIp, int port)
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        cout << "socket() failed" << endl;
-        exit(1);
+        errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
@@ -57,7 +74,7 @@ void startCaesarMicroService(string serverIp, int port)
 
     if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cout << "bind() failed" << endl;
+        errorEncountered("bind()", "Failed", true);
     }
 
     sockLen = sizeof(clientAddress);
@@ -67,8 +84,7 @@ void startCaesarMicroService(string serverIp, int port)
         bytesRecv = recvfrom(clientSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, &sockLen);
         if (bytesRecv < 0)
         {
-            cout << "recv() failed" << endl;
-            exit(1);
+            errorEncountered("recvfrom()", "Failed", true);
         }
         cout << "Client request received..." << endl;
         cout << "Modifying response..." << endl;
@@ -78,8 +94,7 @@ void startCaesarMicroService(string serverIp, int port)
         bytesSent = sendto(clientSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, sizeof(serverAddress));
         if (bytesSent < 0)
         {
-            cout << "send() failed" << endl;
-            exit(1);
+            errorEncountered("sendto()", "Failed", true);
         }
         cout << "Response sent to client." << endl;
         cout << "Response: " << outBuffer << endl;

@@ -2,44 +2,73 @@
 /**
  * Joshua Velasquez
  * February 28, 2020
- * This micro service converts the server request to upper cases
+ * This micro service converts the server request to pig latin
 */
 #include <unistd.h>
 #include <stdio.h>
 #include <string>
-#include <locale>
+#include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <iostream>
 
 using namespace std;
 
 const int BUFFERSIZE = 2048;
 
-string toUpper(string text)
+/**
+ * Prints errors and exits program
+*/
+void errorEncountered(string type, string status, bool quit)
 {
-    string newString = "";
-    locale loc;
-    for (int i = 0; i < text.length(); ++i)
-        newString += toupper(text[i], loc);
-    return newString;
+    cout << "Error encountered: " << type << endl;
+    cout << "Status: " << status << endl;
+    if (quit)
+    {
+        cout << "Exiting program..." << endl;
+        exit(1);
+    }
 }
 
-void startUpperMicroService(string serverIp, int port)
+/**
+ * Converts text to pig latin
+*/
+string toPigLatin(string text)
+{
+    string newText = "";
+    string vowels = "aeiou";
+    char *word = strtok((char *)&text, " ");
+
+    while (word != NULL)
+    {
+        if (vowels.find(word[0]) == string::npos)
+        {
+            newText = text.substr(1, strlen(word) - 1);
+        }
+        else
+        {
+            newText += word;
+        }
+        newText += "ay";
+
+        word = strtok(NULL, " ");
+    }
+    return newText;
+}
+
+void startCustomMicroService(string serverIp, int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     socklen_t sockLen;
     cout << "#########################################" << endl;
-    cout << "\tUpper Micro Service" << endl;
+    cout << "\tIdentity Micro Service" << endl;
     cout << "#########################################" << endl;
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        cout << "socket() failed" << endl;
-        exit(1);
+        errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
@@ -47,7 +76,7 @@ void startUpperMicroService(string serverIp, int port)
 
     if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cout << "bind() failed" << endl;
+        errorEncountered("bind()", "Failed", true);
     }
 
     sockLen = sizeof(clientAddress);
@@ -57,19 +86,17 @@ void startUpperMicroService(string serverIp, int port)
         bytesRecv = recvfrom(clientSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, &sockLen);
         if (bytesRecv < 0)
         {
-            cout << "recv() failed" << endl;
-            exit(1);
+            errorEncountered("recvfrom()", "Failed", true);
         }
         cout << "Client request received..." << endl;
         cout << "Modifying response..." << endl;
-        string response = toUpper(inBuffer);
+        string response = toPigLatin(inBuffer);
         strcpy(outBuffer, response.c_str());
         cout << "Sending response to client..." << endl;
         bytesSent = sendto(clientSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, sizeof(serverAddress));
         if (bytesSent < 0)
         {
-            cout << "send() failed" << endl;
-            exit(1);
+            errorEncountered("sendto()", "Failed", true);
         }
         cout << "Response sent to client." << endl;
         cout << "Response: " << outBuffer << endl;
@@ -83,6 +110,6 @@ int main(int argc, char *argv[])
         cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
         exit(1);
     }
-    startUpperMicroService(argv[1], atoi(argv[2]));
+    startCustomMicroService(argv[1], atoi(argv[2]));
     return 0;
 }

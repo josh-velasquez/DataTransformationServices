@@ -2,12 +2,12 @@
 /**
  * Joshua Velasquez
  * February 28, 2020
- * This micro service converts the server request to pig latin
+ * This micro service returns the server request as is
 */
 #include <unistd.h>
 #include <stdio.h>
-#include <string>
 #include <iostream>
+#include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,27 +16,26 @@ using namespace std;
 
 const int BUFFERSIZE = 2048;
 
-string toPigLatin(string text)
+/**
+ * Prints errors and exits program
+*/
+void errorEncountered(string type, string status, bool quit)
 {
-    string newText = "";
-    string vowels = "aeiou";
-    char firstLetter = text[0];
-    cout << firstLetter << endl;
-    if (vowels.find(firstLetter) == string::npos)
+    cout << "Error encountered: " << type << endl;
+    cout << "Status: " << status << endl;
+    if (quit)
     {
-        newText = text.substr(1, text.length() - 1);
-        cout << newText << endl;
-        newText += firstLetter;
+        cout << "Exiting program..." << endl;
+        exit(1);
     }
-    else
-    {
-        newText = text;
-    }
-    newText += "ay";
-    return newText;
 }
 
-void startCustomMicroService(string serverIp, int port)
+string toIdentity(string text)
+{
+    return text;
+}
+
+void startIdentityMicroService(string serverIp, int port)
 {
     int clientSocket, bytesSent, bytesRecv;
     struct sockaddr_in serverAddress, clientAddress;
@@ -48,8 +47,7 @@ void startCustomMicroService(string serverIp, int port)
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
     {
-        cout << "socket() failed" << endl;
-        exit(1);
+        errorEncountered("socket()", "Failed", true);
     }
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // Change later
@@ -57,7 +55,7 @@ void startCustomMicroService(string serverIp, int port)
 
     if (bind(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cout << "bind() failed" << endl;
+        errorEncountered("bind()", "Failed", true);
     }
 
     sockLen = sizeof(clientAddress);
@@ -67,19 +65,17 @@ void startCustomMicroService(string serverIp, int port)
         bytesRecv = recvfrom(clientSocket, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, &sockLen);
         if (bytesRecv < 0)
         {
-            cout << "recv() failed" << endl;
-            exit(1);
+            errorEncountered("recvfrom()", "Failed", true);
         }
         cout << "Client request received..." << endl;
         cout << "Modifying response..." << endl;
-        string response = toPigLatin(inBuffer);
+        string response = toIdentity(inBuffer);
         strcpy(outBuffer, response.c_str());
         cout << "Sending response to client..." << endl;
         bytesSent = sendto(clientSocket, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&clientAddress, sizeof(serverAddress));
         if (bytesSent < 0)
         {
-            cout << "send() failed" << endl;
-            exit(1);
+            errorEncountered("sendto()", "Failed", true);
         }
         cout << "Response sent to client." << endl;
         cout << "Response: " << outBuffer << endl;
@@ -88,11 +84,14 @@ void startCustomMicroService(string serverIp, int port)
 
 int main(int argc, char *argv[])
 {
+    cout << argv[0] << endl;
+    cout << argv[1] << endl;
+    cout << argv[2] << endl;
     if (argc != 3)
     {
         cout << "Usage: " << argv[0] << " <Server Ip> <Target Port>" << endl;
         exit(1);
     }
-    startCustomMicroService(argv[1], atoi(argv[2]));
+    startIdentityMicroService(argv[1], atoi(argv[2]));
     return 0;
 }
