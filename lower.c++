@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 using namespace std;
 
@@ -53,7 +54,7 @@ void startLowerMicroService(int port)
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     socklen_t sockLen;
     cout << "#########################################" << endl;
-    cout << "\tLower Micro Service" << endl;
+    cout << "\t4. Lower Micro Service" << endl;
     cout << "#########################################" << endl;
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)

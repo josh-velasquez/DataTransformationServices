@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -44,7 +46,7 @@ void startReverseMicroService(int port)
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     socklen_t sockLen;
     cout << "#########################################" << endl;
-    cout << "\tReverse Micro Service" << endl;
+    cout << "\t2. Reverse Micro Service" << endl;
     cout << "#########################################" << endl;
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)

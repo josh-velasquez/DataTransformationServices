@@ -10,7 +10,7 @@ The port of the client and server must match
 
 # Running on Linux terminal
 
-Navigate to StartMicroServices.sh and replace the zsh -c commands with gnome-terminal -e (if you need to, otherwise don't change anything)
+Navigate to StartMicroServices.sh and replace the zsh -c commands with x-terminal-emulator -e ./holdTerminal.sh (if you need to, otherwise don't change anything)
 
 # Running on MacOS terminal
 
@@ -37,3 +37,8 @@ ex. 235
 2 - will reverse the request first
 3 - once reversed the request will be converted to all upper cases
 5 - once reversed and converted to upper cases, it will be encrypted using the caesar cypher
+
+# Script files
+clearMicroServices.sh - deletes all the auto generated make files of the micro services
+hostTerminal.sh - keeps the terminal from closing when auto launched from script
+startMicroServices - compiles and starts all of the micro services in a new terminal

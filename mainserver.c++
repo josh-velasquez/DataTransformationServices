@@ -61,9 +61,9 @@ static void createSocket(int port, Socket &targetSocket, int sock, int socketTyp
 /**
  * Starts the microservices servers by invoking a shell script
 */
-static void startMicroServices(string targetIp, int port)
+static void startMicroServices(int port)
 {
-    string command = "./StartMicroServices.sh " + targetIp + " " + to_string(port);
+    string command = "./startMicroServices.sh " + to_string(port);
     system(command.c_str());
 }
 
@@ -75,8 +75,10 @@ string connectToMicroService(string microservice, int port, string message)
     int bytesSent, bytesRecv;
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     Socket microserviceSocket = Socket();
+    socklen_t sockLen;
     createSocket(port, microserviceSocket, SOCK_DGRAM, IPPROTO_UDP);
-    cout << "Sending request to " << microservice << " microservice..." << endl;
+
+    cout << "\nSending request to " << microservice << " microservice..." << endl;
     strcpy(outBuffer, message.c_str());
     bytesSent = sendto(microserviceSocket.socketVal, outBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, sizeof(microserviceSocket.address));
     if (bytesSent < 0)
@@ -85,7 +87,8 @@ string connectToMicroService(string microservice, int port, string message)
     }
     cout << "Request sent to " << microservice << " microservice." << endl;
     cout << "Waiting for " << microservice << " microservice response..." << endl;
-    bytesRecv = recvfrom(microserviceSocket.socketVal, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, (socklen_t *)&microserviceSocket.address);
+    sockLen = sizeof(microserviceSocket.address);
+    bytesRecv = recvfrom(microserviceSocket.socketVal, inBuffer, BUFFERSIZE, 0, (struct sockaddr *)&microserviceSocket.address, &sockLen);
     if (bytesRecv < 0)
     {
         errorEncountered("recvfrom()", "Failed", true);
@@ -166,7 +169,7 @@ void sendMicroServiceResponseToClient(int clientSocket, string message)
  * (this value should correspond to the port values assigned in the bash script that 
  * auto launches the microservices)
  * Ex. if the server is running on port 3000, the identity microservice would run at
- * port at port 30001
+ * port at port 3001
 */
 void processClientRequest(int port, int clientSocket, string userInput)
 {
@@ -175,9 +178,6 @@ void processClientRequest(int port, int clientSocket, string userInput)
     string newUserMessage = userInput.substr(0, pos);
     string microservices = userInput.substr(pos + 1, userInput.length());
     char microservice;
-    cout << "Starting microservices..." << endl;
-    // startMicroServices(targetIp, port);
-    cout << "Microservices on standby." << endl;
     for (int i = 0; i < microservices.length(); i++)
     {
         microservice = microservices[i];
@@ -247,6 +247,9 @@ void startDataTransformationServer(int port)
     {
         errorEncountered("listen()", "Failed", true);
     }
+    cout << "\n\nStarting microservices..." << endl;
+    startMicroServices(port);
+    cout << "Microservices on standby." << endl;
     while (true)
     {
         struct sockaddr_in clientAddress;

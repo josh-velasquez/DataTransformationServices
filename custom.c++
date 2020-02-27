@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 using namespace std;
 
@@ -36,15 +37,19 @@ void errorEncountered(string type, string status, bool quit)
 string toL33t(string text)
 {
     string newText = "";
-    string letters = "abegiopstz";
+    string lowerLetters = "abegiopstz";
+    string upperLetters = "ABEGIOPSTZ";
     string leet = "4836109572";
-    int pos;
+    int lpos,upos;
     for (int i = 0; i < text.length(); i++)
     {
-        pos = letters.find(text[i]);
-        if (pos != string::npos)
+        lpos = lowerLetters.find(text[i]);
+        upos = upperLetters.find(text[i]);
+        if (lpos != string::npos)
         {
-            newText += leet[pos];
+            newText += leet[lpos];
+        } else if (upos != string::npos) {
+            newText += leet[upos];
         }
         else
         {
@@ -64,7 +69,7 @@ void startCustomMicroService(int port)
     char inBuffer[BUFFERSIZE], outBuffer[BUFFERSIZE];
     socklen_t sockLen;
     cout << "#########################################" << endl;
-    cout << "\tL33t Micro Service" << endl;
+    cout << "\t6. L33t Micro Service" << endl;
     cout << "#########################################" << endl;
 
     if ((clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
