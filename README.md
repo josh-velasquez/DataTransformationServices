@@ -1,4 +1,4 @@
-# DataTransformationServices
+# Data Transformation Services
 
 Consists of six micro services that can alter user data sent from a client to the server.
 The server and client communicates to each other via TCP connection for realiability while the server to the micro services connection communicates through UDP for fast response.
